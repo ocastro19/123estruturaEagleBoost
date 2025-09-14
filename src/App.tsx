@@ -59,10 +59,21 @@ const MainContent: React.FC = () => {
     window.addEventListener('contentUpdated', handleAdminSave);
     window.addEventListener('forceContentReload', handleAdminSave);
     
+    // Listener adicional para mudanças de storage entre abas
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'site_content' && e.newValue) {
+        console.log('🔄 Content updated in another tab, forcing re-render');
+        setRenderKey(prev => prev + 1);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
     return () => {
       window.removeEventListener('adminContentSaved', handleAdminSave);
       window.removeEventListener('contentUpdated', handleAdminSave);
       window.removeEventListener('forceContentReload', handleAdminSave);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 

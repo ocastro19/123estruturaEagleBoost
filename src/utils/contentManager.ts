@@ -808,6 +808,12 @@ class ContentManager {
       window.dispatchEvent(event);
       console.log('📡 ContentManager: Custom event dispatched');
       
+      // Força atualização da página principal se estiver aberta em outra aba
+      this.forceMainPageUpdate();
+      
+      // Salva backup para deploy futuro
+      this.saveDeploymentBackup();
+      
     } catch (error) {
       console.error('❌ ContentManager: Error saving content:', error);
       
@@ -836,6 +842,95 @@ class ContentManager {
     }
   }
 
+  // Força atualização da página principal
+  private forceMainPageUpdate(): void {
+    try {
+      // Dispatch evento global para forçar re-render da main page
+      const forceUpdateEvent = new CustomEvent('forceContentReload', {
+        detail: { 
+          content: { ...this.content },
+          timestamp: Date.now(),
+          source: 'admin_save'
+        }
+      });
+      window.dispatchEvent(forceUpdateEvent);
+      
+      // Também dispatch evento específico para admin
+      const adminSaveEvent = new CustomEvent('adminContentSaved', {
+        detail: { 
+          content: { ...this.content },
+          timestamp: Date.now()
+        }
+      });
+      window.dispatchEvent(adminSaveEvent);
+      
+      console.log('🔄 ContentManager: Force update events dispatched');
+      
+      // Se estiver no admin, também atualiza o título da página
+      if (window.location.pathname.includes('/admin')) {
+        document.title = `${this.content.topBanner?.title || 'EAGLEBOOST'} - Admin`;
+      }
+      
+    } catch (error) {
+      console.warn('⚠️ ContentManager: Error forcing main page update:', error);
+    }
+  }
+
+  // Salva backup para deployment futuro
+  private saveDeploymentBackup(): void {
+    try {
+      const deploymentData = {
+        content: this.content,
+        timestamp: Date.now(),
+        version: '1.0.0',
+        buildReady: true,
+        metadata: {
+          lastModified: new Date().toISOString(),
+          contentSize: JSON.stringify(this.content).length,
+          sections: Object.keys(this.content).length
+        }
+      };
+      
+      // Salva backup específico para deployment
+      localStorage.setItem('deployment_backup', JSON.stringify(deploymentData));
+      
+      // Salva também no sessionStorage para persistir durante a sessão
+      sessionStorage.setItem('deployment_ready', JSON.stringify(deploymentData));
+      
+      // Disponibiliza globalmente para fácil acesso
+      (window as any).deploymentData = deploymentData;
+      
+      console.log('🚀 ContentManager: Deployment backup saved');
+      console.log('📦 ContentManager: Content ready for Vercel deployment');
+      
+      // Log para facilitar extração dos dados
+      console.log('💡 Para extrair dados para Vercel, execute: JSON.stringify(window.deploymentData.content, null, 2)');
+      
+    } catch (error) {
+      console.warn('⚠️ ContentManager: Error saving deployment backup:', error);
+    }
+  }
+
+  // Método público para obter dados prontos para deployment
+  getDeploymentData(): any {
+    return {
+      content: this.content,
+      timestamp: Date.now(),
+      version: '1.0.0',
+      buildReady: true,
+      metadata: {
+        lastModified: new Date().toISOString(),
+        contentSize: JSON.stringify(this.content).length,
+        sections: Object.keys(this.content).length,
+        deploymentInstructions: [
+          '1. Copie o conteúdo da propriedade "content"',
+          '2. Cole no arquivo de configuração do seu projeto Vercel',
+          '3. Faça o build e deploy normalmente',
+          '4. Todas as alterações feitas no admin estarão incluídas'
+        ]
+      }
+    };
+  }
   // Atualiza seção específica
   updateSection<K extends keyof SiteContent>(section: K, data: SiteContent[K]): void {
     this.content[section] = data;
