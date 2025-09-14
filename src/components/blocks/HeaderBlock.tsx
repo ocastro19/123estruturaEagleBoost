@@ -3,7 +3,13 @@ import { useContentSection } from '../../hooks/useContent';
 
 export const HeaderBlock: React.FC = () => {
   const doctors = useContentSection('doctors');
-  const { clinicallyReviewed } = useContentSection('titleBlocks');
+  const titleBlocks = useContentSection('titleBlocks');
+  const clinicallyReviewed = titleBlocks?.clinicallyReviewed || {
+    title: '',
+    subtitle: '',
+    titleColor: 'text-white',
+    subtitleColor: 'text-white'
+  };
 
   return (
     <div className="w-full max-w-sm mx-auto text-center px-4 mb-8">
