@@ -13,11 +13,17 @@ export const BoltNavigation: React.FC<BoltNavigationProps> = ({ currentPage, onP
 
   // Detecta se está no ambiente Bolt
   const isBoltEnvironment = window.location.hostname.includes('bolt') || 
-                           window.location.hostname.includes('localhost');
+                           window.location.hostname.includes('localhost') ||
+                           window.location.hostname.includes('webcontainer');
 
   // Se não estiver no Bolt, não renderiza o menu
   if (!isBoltEnvironment) {
-    return null;
+    // Force show in development or if explicitly enabled
+    const forceShow = process.env.NODE_ENV === 'development' || 
+                     localStorage.getItem('force_bolt_nav') === 'true';
+    if (!forceShow) {
+      return null;
+    }
   }
 
   const pages = [
