@@ -866,6 +866,9 @@ class ContentManager {
   // Força atualização da página principal
   private forceMainPageUpdate(): void {
     try {
+      // Força reload do conteúdo em todas as instâncias
+      this.content = this.loadContent();
+      
       // Dispatch evento global para forçar re-render da main page
       const forceUpdateEvent = new CustomEvent('forceContentReload', {
         detail: { 
@@ -884,6 +887,16 @@ class ContentManager {
         }
       });
       window.dispatchEvent(adminSaveEvent);
+      
+      // Força atualização via storage event para outras abas
+      const storageEvent = new StorageEvent('storage', {
+        key: this.storageKey,
+        newValue: JSON.stringify(this.content),
+        oldValue: null,
+        storageArea: localStorage,
+        url: window.location.href
+      });
+      window.dispatchEvent(storageEvent);
       
       console.log('🔄 ContentManager: Force update events dispatched');
       

@@ -50,8 +50,16 @@ const MainContent: React.FC = () => {
   const [renderKey, setRenderKey] = React.useState(0);
   
   React.useEffect(() => {
+    // Força reload do conteúdo ao montar o componente
+    const latestContent = contentManager.getContent();
+    if (JSON.stringify(latestContent) !== JSON.stringify(content)) {
+      setRenderKey(prev => prev + 1);
+    }
+    
     const handleAdminSave = () => {
       console.log('🔄 Admin content saved, forcing re-render');
+      // Força reload do contentManager
+      (window as any).contentManager = contentManager;
       setRenderKey(prev => prev + 1);
     };
     
@@ -69,11 +77,24 @@ const MainContent: React.FC = () => {
     
     window.addEventListener('storage', handleStorageChange);
     
+    // Polling para garantir sincronização (fallback)
+    const syncInterval = setInterval(() => {
+      const currentContent = contentManager.getContent();
+      const currentContentString = JSON.stringify(currentContent);
+      const storedContent = localStorage.getItem('site_content');
+      
+      if (storedContent && currentContentString !== storedContent) {
+        console.log('🔄 Content drift detected, syncing...');
+        setRenderKey(prev => prev + 1);
+      }
+    }, 2000); // Check every 2 seconds
+    
     return () => {
       window.removeEventListener('adminContentSaved', handleAdminSave);
       window.removeEventListener('contentUpdated', handleAdminSave);
       window.removeEventListener('forceContentReload', handleAdminSave);
       window.removeEventListener('storage', handleStorageChange);
+      clearInterval(syncInterval);
     };
   }, []);
 
