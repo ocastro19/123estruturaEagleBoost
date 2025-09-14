@@ -602,17 +602,38 @@ class ContentManager {
 
   // Preserva configurações do usuário, apenas adiciona propriedades ausentes
   private mergeWithDefault(stored: Partial<SiteContent>): SiteContent {
-    // Se o usuário tem configurações salvas, preserva elas completamente
-    // Apenas adiciona propriedades que não existem
-    const result = { ...defaultContent };
-    
-    // Preserva configurações do usuário sem sobrescrever
-    Object.keys(stored).forEach(key => {
-      if (stored[key as keyof SiteContent] !== undefined) {
-        (result as any)[key] = stored[key as keyof SiteContent];
+    return this.deepMerge(defaultContent, stored) as SiteContent;
+  }
+
+  // Implementa deep merge para preservar estruturas aninhadas
+  private deepMerge(target: any, source: any): any {
+    if (!source || typeof source !== 'object') {
+      return target;
+    }
+
+    const result = { ...target };
+
+    Object.keys(source).forEach(key => {
+      const sourceValue = source[key];
+      const targetValue = target[key];
+
+      if (sourceValue === null || sourceValue === undefined) {
+        // Mantém o valor padrão se o source for null/undefined
+        return;
+      }
+
+      if (Array.isArray(sourceValue)) {
+        // Para arrays, usa o valor do source diretamente
+        result[key] = sourceValue;
+      } else if (typeof sourceValue === 'object' && typeof targetValue === 'object') {
+        // Para objetos, faz merge recursivo
+        result[key] = this.deepMerge(targetValue, sourceValue);
+      } else {
+        // Para valores primitivos, usa o valor do source
+        result[key] = sourceValue;
       }
     });
-    
+
     return result;
   }
 
