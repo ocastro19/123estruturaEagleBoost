@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Admin Access</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .info { background: #d1ecf1; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste de Acesso ao Admin</h1>
+    <div id="results"></div>
+    
+    <script>
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        function testAdmin() {
+            addResult('🚀 Iniciando testes...', 'info');
+            
+            // Teste 1: localStorage
+            try {
+                localStorage.setItem('test', 'ok');
+                localStorage.removeItem('test');
+                addResult('✅ localStorage funcionando', 'success');
+            } catch(e) {
+                addResult('❌ localStorage com problema: ' + e.message, 'error');
+            }
+            
+            // Teste 2: Verificar se as URLs estão acessíveis
+            const urls = [
+                'http://localhost:5002',
+                'http://localhost:5002/admin/login',
+                'http://localhost:4173',
+                'http://localhost:4173/admin/login'
+            ];
+            
+            urls.forEach(url => {
+                fetch(url)
+                    .then(response => {
+                        if (response.ok) {
+                            addResult(`✅ ${url} - Acessível`, 'success');
+                        } else {
+                            addResult(`⚠️ ${url} - Status: ${response.status}`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        addResult(`❌ ${url} - Erro: ${error.message}`, 'error');
+                    });
+            });
+            
+            // Teste 3: Verificar credenciais padrão
+            const defaultCreds = {
+                username: 'admin',
+                password: 'eagleboost123'
+            };
+            
+            addResult(`🔑 Credenciais padrão: ${defaultCreds.username} / ${defaultCreds.password}`, 'info');
+            
+            // Teste 4: Simular login
+            setTimeout(() => {
+                addResult('🔄 Testando simulação de login...', 'info');
+                
+                // Simular o que o authService faz
+                try {
+                    const stored = localStorage.getItem('admin_auth');
+                    if (stored) {
+                        const creds = JSON.parse(stored);
+                        addResult(`📋 Credenciais armazenadas: ${creds.username}`, 'info');
+                    } else {
+                        addResult('📋 Nenhuma credencial armazenada', 'info');
+                    }
+                    
+                    const token = localStorage.getItem('admin_token');
+                    if (token) {
+                        addResult('🎫 Token de autenticação encontrado', 'success');
+                    } else {
+                        addResult('🎫 Nenhum token de autenticação', 'info');
+                    }
+                    
+                } catch(e) {
+                    addResult('❌ Erro ao verificar autenticação: ' + e.message, 'error');
+                }
+                
+                addResult('✅ Testes concluídos!', 'success');
+            }, 2000);
+        }
+        
+        // Executar testes quando a página carregar
+        window.onload = testAdmin;
+    </script>
+</body>
+</html>

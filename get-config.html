@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extrair Configurações</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .output { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .json-output { background: #1e1e1e; color: #fff; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #005a87; }
+        .copy-btn { background: #28a745; }
+        .copy-btn:hover { background: #1e7e34; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Extrator de Configurações</h1>
+        <p>Esta página vai extrair automaticamente suas alterações do localStorage.</p>
+        
+        <button onclick="extractConfig()">📥 Extrair Configurações</button>
+        <button onclick="copyToClipboard()" class="copy-btn">📋 Copiar JSON</button>
+        
+        <div id="output" class="output" style="display:none;">
+            <h3>📝 Suas Alterações:</h3>
+            <div id="changes"></div>
+        </div>
+        
+        <div id="json-container" style="display:none;">
+            <h3>💾 Configuração Completa (JSON):</h3>
+            <div id="json-output" class="json-output"></div>
+        </div>
+    </div>
+
+    <script>
+        let configData = null;
+        
+        function extractConfig() {
+            try {
+                const siteContent = localStorage.getItem('site_content');
+                
+                if (!siteContent) {
+                    document.getElementById('output').innerHTML = '<p style="color: red;">❌ Nenhuma configuração encontrada no localStorage</p>';
+                    document.getElementById('output').style.display = 'block';
+                    return;
+                }
+                
+                const config = JSON.parse(siteContent);
+                configData = config;
+                
+                let changesHtml = '';
+                
+                // Verificar títulos
+                if (config.titleBlocks) {
+                    changesHtml += '<h4>📝 TÍTULOS ALTERADOS:</h4><ul>';
+                    Object.keys(config.titleBlocks).forEach(key => {
+                        changesHtml += `<li><strong>${key}:</strong> "${config.titleBlocks[key]}"</li>`;
+                    });
+                    changesHtml += '</ul>';
+                }
+                
+                // Verificar cores dos CTAs
+                if (config.customCTAs) {
+                    changesHtml += '<h4>🎨 CORES DOS BOTÕES:</h4><ul>';
+                    if (config.customCTAs.doctorTrustCTA) {
+                        changesHtml += `<li><strong>Doctor Trust CTA:</strong> ${config.customCTAs.doctorTrustCTA.backgroundColor}</li>`;
+                    }
+                    if (config.customCTAs.successStoryCTA) {
+                        changesHtml += `<li><strong>Success Story CTA:</strong> ${config.customCTAs.successStoryCTA.backgroundColor}</li>`;
+                    }
+                    changesHtml += '</ul>';
+                }
+                
+                // Verificar cores de fundo
+                if (config.backgroundSettings) {
+                    changesHtml += '<h4>🌈 CORES DE FUNDO:</h4><ul>';
+                    changesHtml += `<li><strong>Background atual:</strong> ${config.backgroundSettings.currentBackground}</li>`;
+                    changesHtml += '</ul>';
+                }
+                
+                // Verificar oferta principal
+                if (config.mainOffer) {
+                    changesHtml += '<h4>🎯 OFERTA PRINCIPAL:</h4><ul>';
+                    if (config.mainOffer.title) {
+                        changesHtml += `<li><strong>Título:</strong> ${config.mainOffer.title}</li>`;
+                    }
+                    if (config.mainOffer.description) {
+                        changesHtml += `<li><strong>Descrição:</strong> ${config.mainOffer.description}</li>`;
+                    }
+                    changesHtml += '</ul>';
+                }
+                
+                document.getElementById('changes').innerHTML = changesHtml;
+                document.getElementById('output').style.display = 'block';
+                
+                // Mostrar JSON completo
+                document.getElementById('json-output').textContent = JSON.stringify(config, null, 2);
+                document.getElementById('json-container').style.display = 'block';
+                
+                console.log('✅ Configurações extraídas com sucesso!');
+                
+            } catch (error) {
+                document.getElementById('output').innerHTML = `<p style="color: red;">❌ Erro ao extrair configurações: ${error.message}</p>`;
+                document.getElementById('output').style.display = 'block';
+            }
+        }
+        
+        function copyToClipboard() {
+            if (!configData) {
+                alert('❌ Primeiro extraia as configurações!');
+                return;
+            }
+            
+            const jsonText = JSON.stringify(configData, null, 2);
+            
+            // Tentar usar a API moderna
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(jsonText).then(() => {
+                    alert('✅ JSON copiado para a área de transferência!');
+                }).catch(() => {
+                    fallbackCopy(jsonText);
+                });
+            } else {
+                fallbackCopy(jsonText);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ JSON copiado para a área de transferência!');
+            } catch (err) {
+                alert('❌ Não foi possível copiar. Selecione o texto manualmente.');
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        // Extrair automaticamente ao carregar a página
+        window.onload = function() {
+            setTimeout(extractConfig, 500);
+        };
+    </script>
+</body>
+</html>

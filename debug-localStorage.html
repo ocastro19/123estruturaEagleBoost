@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnóstico localStorage</title>
+</head>
+<body>
+    <h1>Diagnóstico do localStorage</h1>
+    <div id="output"></div>
+    
+    <script>
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function diagnoseLocalStorage() {
+            const output = document.getElementById('output');
+            let html = '<h2>=== DIAGNÓSTICO DO LOCALSTORAGE ===</h2>';
+            
+            let totalSize = 0;
+            let items = [];
+            
+            // Calcular tamanho de cada item
+            for(let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                const size = new Blob([value]).size;
+                totalSize += size;
+                items.push({key, size, value});
+            }
+            
+            html += `<p><strong>Tamanho total:</strong> ${formatBytes(totalSize)}</p>`;
+            html += `<p><strong>Limite típico:</strong> ~5-10MB</p>`;
+            html += `<p><strong>Número de itens:</strong> ${localStorage.length}</p>`;
+            
+            // Ordenar por tamanho
+            items.sort((a,b) => b.size - a.size);
+            
+            html += '<h3>Itens maiores:</h3><ul>';
+            items.slice(0,10).forEach(item => {
+                html += `<li><strong>${item.key}:</strong> ${formatBytes(item.size)}</li>`;
+            });
+            html += '</ul>';
+            
+            // Analisar site_content especificamente
+            const siteContent = localStorage.getItem('site_content');
+            if(siteContent) {
+                try {
+                    const content = JSON.parse(siteContent);
+                    html += '<h3>=== ANÁLISE DO SITE_CONTENT ===</h3>';
+                    html += `<p><strong>Tamanho do site_content:</strong> ${formatBytes(new Blob([siteContent]).size)}</p>`;
+                    
+                    if(content.doctors?.doctors) {
+                        html += `<p><strong>Número de médicos:</strong> ${content.doctors.doctors.length}</p>`;
+                        html += '<h4>Fotos dos médicos:</h4><ul>';
+                        content.doctors.doctors.forEach((doc,i) => {
+                            if(doc.photo) {
+                                const photoSize = new Blob([doc.photo]).size;
+                                html += `<li><strong>${doc.name || 'Médico ' + (i+1)}:</strong> ${formatBytes(photoSize)}</li>`;
+                            }
+                        });
+                        html += '</ul>';
+                    }
+                } catch(e) {
+                    html += `<p style="color: red;">Erro ao analisar site_content: ${e.message}</p>`;
+                }
+            }
+            
+            // Botão para limpar dados grandes
+            html += '<h3>Ações:</h3>';
+            html += '<button onclick="cleanupLargeData()">Limpar Dados Grandes (>1MB)</button> ';
+            html += '<button onclick="compressImages()">Comprimir Imagens dos Médicos</button> ';
+            html += '<button onclick="location.reload()">Atualizar Diagnóstico</button>';
+            
+            output.innerHTML = html;
+        }
+        
+        function cleanupLargeData() {
+            let cleaned = 0;
+            const keysToRemove = [];
+            
+            for(let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                const size = new Blob([value]).size;
+                
+                // Remover itens maiores que 1MB (exceto site_content)
+                if(size > 1024 * 1024 && key !== 'site_content') {
+                    keysToRemove.push(key);
+                    cleaned += size;
+                }
+            }
+            
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                console.log('Removido:', key);
+            });
+            
+            alert(`Limpeza concluída! Removidos ${keysToRemove.length} itens, liberando ${formatBytes(cleaned)}`);
+            diagnoseLocalStorage();
+        }
+        
+        function compressImages() {
+            const siteContent = localStorage.getItem('site_content');
+            if(!siteContent) {
+                alert('site_content não encontrado!');
+                return;
+            }
+            
+            try {
+                const content = JSON.parse(siteContent);
+                let compressed = 0;
+                
+                if(content.doctors?.doctors) {
+                    content.doctors.doctors.forEach((doc, i) => {
+                        if(doc.photo && doc.photo.length > 100000) { // > 100KB
+                            const originalSize = doc.photo.length;
+                            // Simular compressão removendo qualidade (isso é apenas um exemplo)
+                            // Em produção, você usaria uma biblioteca de compressão de imagem
+                            console.log(`Médico ${i+1} (${doc.name}): foto muito grande (${formatBytes(originalSize)})`);
+                            compressed++;
+                        }
+                    });
+                }
+                
+                if(compressed > 0) {
+                    alert(`Encontradas ${compressed} fotos grandes. Para compressão real, implemente uma biblioteca de compressão de imagem.`);
+                } else {
+                    alert('Nenhuma foto grande encontrada!');
+                }
+            } catch(e) {
+                alert('Erro ao processar site_content: ' + e.message);
+            }
+        }
+        
+        // Executar diagnóstico ao carregar
+        window.onload = diagnoseLocalStorage;
+    </script>
+</body>
+</html>
