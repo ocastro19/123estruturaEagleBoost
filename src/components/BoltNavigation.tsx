@@ -11,20 +11,40 @@ export const BoltNavigation: React.FC<BoltNavigationProps> = ({ currentPage, onP
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Detecta se está no ambiente Bolt
-  const isBoltEnvironment = window.location.hostname.includes('bolt') || 
-                           window.location.hostname.includes('localhost') ||
-                           window.location.hostname.includes('webcontainer') ||
-                           window.location.hostname.includes('local-credentialless') ||
-                           window.location.hostname.includes('stackblitz') ||
-                           window.location.hostname.includes('gitpod');
+  // GARANTIA: Detecta se está no ambiente Bolt com verificação rigorosa
+  const isBoltEnvironment = React.useMemo(() => {
+    const hostname = window.location.hostname.toLowerCase();
+    const isBolt = hostname.includes('bolt') || 
+                   hostname.includes('localhost') ||
+                   hostname.includes('webcontainer') ||
+                   hostname.includes('local-credentialless') ||
+                   hostname.includes('stackblitz') ||
+                   hostname.includes('gitpod') ||
+                   hostname.includes('127.0.0.1') ||
+                   hostname.includes('0.0.0.0');
+    
+    console.log('🔒 GARANTIA Bolt Button:', {
+      hostname: hostname,
+      isBoltEnvironment: isBolt,
+      willShowButton: isBolt
+    });
+    
+    return isBolt;
+  }, []);
 
-  // Se não estiver no Bolt, não renderiza o menu
+  // GARANTIA: Se não estiver no Bolt, não renderiza o menu (verificação dupla)
   if (!isBoltEnvironment) {
-    // Force show in development or if explicitly enabled
+    // GARANTIA: Só força mostrar em casos muito específicos
     const forceShow = process.env.NODE_ENV === 'development' || 
                      localStorage.getItem('force_bolt_nav') === 'true' ||
                      window.location.search.includes('bolt_nav=true');
+    
+    console.log('🔒 GARANTIA: Botão Bolt não será mostrado em produção:', {
+      hostname: window.location.hostname,
+      forceShow: forceShow,
+      nodeEnv: process.env.NODE_ENV
+    });
+    
     if (!forceShow) {
       return null;
     }

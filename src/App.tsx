@@ -50,14 +50,23 @@ const MainContent: React.FC = () => {
   const [renderKey, setRenderKey] = React.useState(0);
   
   React.useEffect(() => {
+    // GARANTIA: Log do estado inicial do conteúdo
+    console.log('🔒 GARANTIA MainContent: Inicializando com conteúdo:', {
+      timestamp: new Date().toISOString(),
+      hasContent: !!content,
+      backgroundClass: backgroundClass
+    });
+    
     // Força reload do conteúdo ao montar o componente
     const latestContent = contentManager.getContent();
     if (JSON.stringify(latestContent) !== JSON.stringify(content)) {
+      console.log('🔒 GARANTIA: Conteúdo desatualizado detectado, forçando atualização');
       setRenderKey(prev => prev + 1);
     }
     
     const handleAdminSave = () => {
       console.log('🔄 Admin content saved, forcing re-render');
+      console.log('🔒 GARANTIA: Alterações do admin detectadas, aplicando na main page');
       // Força reload do contentManager
       (window as any).contentManager = contentManager;
       setRenderKey(prev => prev + 1);
@@ -71,6 +80,7 @@ const MainContent: React.FC = () => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'site_content' && e.newValue) {
         console.log('🔄 Content updated in another tab, forcing re-render');
+        console.log('🔒 GARANTIA: Sincronização entre abas detectada');
         setRenderKey(prev => prev + 1);
       }
     };
@@ -85,6 +95,7 @@ const MainContent: React.FC = () => {
       
       if (storedContent && currentContentString !== storedContent) {
         console.log('🔄 Content drift detected, syncing...');
+        console.log('🔒 GARANTIA: Diferença de conteúdo detectada, sincronizando');
         setRenderKey(prev => prev + 1);
       }
     }, 2000); // Check every 2 seconds

@@ -761,6 +761,13 @@ class ContentManager {
     console.log('📝 ContentManager: Updating content');
     console.log('📝 ContentManager: Updates received:', Object.keys(updates));
     
+    // GARANTIA: Log detalhado das alterações sendo salvas
+    console.log('🔒 GARANTIA: Salvando alterações no localStorage:', {
+      timestamp: new Date().toISOString(),
+      updates: updates,
+      currentStorageSize: localStorage.getItem('site_content')?.length || 0
+    });
+    
     try {
       // Verificar localStorage antes de salvar
       const localStorageSize = JSON.stringify(localStorage).length;
@@ -796,6 +803,20 @@ class ContentManager {
       console.log('💾 ContentManager: Attempting to save to localStorage...');
       localStorage.setItem(this.storageKey, contentString);
       console.log('✅ ContentManager: Content saved to localStorage successfully');
+      
+      // GARANTIA: Verificar se foi realmente salvo
+      const savedContent = localStorage.getItem(this.storageKey);
+      if (savedContent) {
+        const parsedSaved = JSON.parse(savedContent);
+        console.log('✅ GARANTIA: Conteúdo confirmado no localStorage:', {
+          saved: true,
+          size: savedContent.length,
+          lastUpdated: parsedSaved.lastUpdated || 'N/A',
+          sections: Object.keys(parsedSaved).length
+        });
+      } else {
+        console.error('❌ GARANTIA: FALHA - Conteúdo NÃO foi salvo no localStorage!');
+      }
       
       // Log específico para médicos
       if (this.content.doctors && this.content.doctors.doctors) {
@@ -835,8 +856,12 @@ class ContentManager {
       // Salva backup para deploy futuro
       this.saveDeploymentBackup();
       
+      // GARANTIA FINAL: Confirmar que tudo foi salvo
+      console.log('🔒 GARANTIA FINAL: Todas as alterações foram salvas e estão prontas para deployment');
+      
     } catch (error) {
       console.error('❌ ContentManager: Error saving content:', error);
+      console.error('❌ GARANTIA: ERRO CRÍTICO - Alterações podem ter sido perdidas!');
       
       // Tentar salvar uma versão reduzida se der erro
       if (error instanceof Error && error.name === 'QuotaExceededError') {
