@@ -11,8 +11,14 @@ export const BoltNavigation: React.FC<BoltNavigationProps> = ({ currentPage, onP
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Componente oculto - acesso ao admin apenas via /admin
-  return null;
+  // Detecta se está no ambiente Bolt
+  const isBoltEnvironment = window.location.hostname.includes('bolt') || 
+                           window.location.hostname.includes('localhost');
+
+  // Se não estiver no Bolt, não renderiza o menu
+  if (!isBoltEnvironment) {
+    return null;
+  }
 
   const pages = [
     { id: 'main', name: 'Main Page', icon: Home, description: 'Página principal da landing page', path: '/' },
