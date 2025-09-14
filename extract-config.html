@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚀 Extrair Configurações para Vercel</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .status { 
+            background: rgba(255,255,255,0.2); 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin: 15px 0;
+            border-left: 5px solid #4CAF50;
+        }
+        .json-output { 
+            background: rgba(0,0,0,0.8); 
+            color: #00ff00; 
+            padding: 20px; 
+            border-radius: 15px; 
+            font-family: 'Courier New', monospace; 
+            white-space: pre-wrap; 
+            max-height: 500px; 
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        button { 
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            margin: 10px; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .copy-btn { 
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+        .download-btn {
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+        }
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .warning {
+            background: rgba(255,193,7,0.2);
+            border-left-color: #FFC107;
+        }
+        .success {
+            background: rgba(76,175,80,0.2);
+            border-left-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 EAGLEBOOST → Vercel</h1>
+            <p>Extrair suas configurações personalizadas para deployment</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Instruções para Deploy no Vercel:</h3>
+            
+            <div class="step">
+                <strong>1. Extrair Configurações</strong><br>
+                Clique no botão abaixo para extrair suas alterações do localStorage
+            </div>
+            
+            <div class="step">
+                <strong>2. Salvar Arquivo</strong><br>
+                Baixe o arquivo JSON com suas configurações
+            </div>
+            
+            <div class="step">
+                <strong>3. Deploy no Vercel</strong><br>
+                • Acesse <a href="https://vercel.com" target="_blank" style="color: #4CAF50;">vercel.com</a><br>
+                • Conecte seu repositório GitHub<br>
+                • Configure: Framework = Vite, Build = npm run build, Output = dist
+            </div>
+            
+            <div class="step success">
+                <strong>✅ Garantias Incluídas:</strong><br>
+                • Suas alterações do Admin estão preservadas<br>
+                • Botão Bolt não aparecerá em produção<br>
+                • Todas as configurações personalizadas incluídas
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="extractConfig()">📥 Extrair Minhas Configurações</button>
+            <button onclick="copyToClipboard()" class="copy-btn">📋 Copiar JSON</button>
+            <button onclick="downloadConfig()" class="download-btn">💾 Baixar Arquivo</button>
+        </div>
+
+        <div id="status" class="status" style="display:none;">
+            <h3>📊 Status da Extração:</h3>
+            <div id="statusContent"></div>
+        </div>
+
+        <div id="json-container" style="display:none;">
+            <h3>💾 Suas Configurações (JSON):</h3>
+            <div id="json-output" class="json-output"></div>
+        </div>
+    </div>
+
+    <script>
+        let configData = null;
+        
+        function extractConfig() {
+            try {
+                console.log('🔍 Iniciando extração de configurações...');
+                
+                // Tentar múltiplas fontes de dados
+                let siteContent = null;
+                
+                // Fonte 1: localStorage direto
+                const storedContent = localStorage.getItem('site_content');
+                if (storedContent) {
+                    siteContent = JSON.parse(storedContent);
+                    console.log('✅ Configurações encontradas no localStorage');
+                }
+                
+                // Fonte 2: contentManager global
+                if (!siteContent && window.contentManager) {
+                    siteContent = window.contentManager.getContent();
+                    console.log('✅ Configurações encontradas no contentManager');
+                }
+                
+                // Fonte 3: deploymentData global
+                if (!siteContent && window.deploymentData) {
+                    siteContent = window.deploymentData.content;
+                    console.log('✅ Configurações encontradas no deploymentData');
+                }
+                
+                if (!siteContent) {
+                    throw new Error('Nenhuma configuração encontrada');
+                }
+                
+                // Preparar dados para deployment
+                configData = {
+                    content: siteContent,
+                    metadata: {
+                        extractedAt: new Date().toISOString(),
+                        version: '1.0.0',
+                        source: 'localStorage + admin_changes',
+                        readyForVercel: true,
+                        contentSize: JSON.stringify(siteContent).length,
+                        sections: Object.keys(siteContent).length
+                    },
+                    deployment: {
+                        platform: 'vercel',
+                        framework: 'vite',
+                        buildCommand: 'npm run build',
+                        outputDirectory: 'dist',
+                        nodeVersion: '18.x'
+                    }
+                };
+                
+                // Mostrar status
+                const statusDiv = document.getElementById('status');
+                const statusContent = document.getElementById('statusContent');
+                
+                let statusHtml = '<div style="color: #4CAF50;">✅ Extração bem-sucedida!</div>';
+                statusHtml += `<div>📊 Tamanho: ${formatBytes(JSON.stringify(configData).length)}</div>`;
+                statusHtml += `<div>📁 Seções: ${Object.keys(siteContent).length}</div>`;
+                statusHtml += `<div>🕒 Extraído em: ${new Date().toLocaleString('pt-BR')}</div>`;
+                
+                // Verificar seções importantes
+                const importantSections = ['topBanner', 'mainOffer', 'doctors', 'testimonials'];
+                statusHtml += '<div style="margin-top: 15px;"><strong>🔍 Seções Verificadas:</strong></div>';
+                importantSections.forEach(section => {
+                    const exists = siteContent[section] ? '✅' : '❌';
+                    statusHtml += `<div>${exists} ${section}</div>`;
+                });
+                
+                statusContent.innerHTML = statusHtml;
+                statusDiv.style.display = 'block';
+                
+                // Mostrar JSON
+                document.getElementById('json-output').textContent = JSON.stringify(configData, null, 2);
+                document.getElementById('json-container').style.display = 'block';
+                
+                console.log('🎉 Configurações extraídas com sucesso!');
+                console.log('📦 Dados prontos para Vercel:', configData);
+                
+            } catch (error) {
+                console.error('❌ Erro na extração:', error);
+                
+                const statusDiv = document.getElementById('status');
+                const statusContent = document.getElementById('statusContent');
+                
+                statusContent.innerHTML = `
+                    <div style="color: #f44336;">❌ Erro na extração: ${error.message}</div>
+                    <div style="margin-top: 10px;">
+                        <strong>💡 Soluções:</strong><br>
+                        • Certifique-se de ter feito alterações no Admin<br>
+                        • Recarregue a página e tente novamente<br>
+                        • Verifique o console para mais detalhes
+                    </div>
+                `;
+                statusDiv.style.display = 'block';
+            }
+        }
+        
+        function copyToClipboard() {
+            if (!configData) {
+                alert('❌ Primeiro extraia as configurações!');
+                return;
+            }
+            
+            const jsonText = JSON.stringify(configData, null, 2);
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(jsonText).then(() => {
+                    alert('✅ Configurações copiadas para a área de transferência!');
+                }).catch(() => {
+                    fallbackCopy(jsonText);
+                });
+            } else {
+                fallbackCopy(jsonText);
+            }
+        }
+        
+        function downloadConfig() {
+            if (!configData) {
+                alert('❌ Primeiro extraia as configurações!');
+                return;
+            }
+            
+            const jsonText = JSON.stringify(configData, null, 2);
+            const blob = new Blob([jsonText], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `eagleboost-config-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Arquivo baixado com sucesso!');
+        }
+        
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ Configurações copiadas!');
+            } catch (err) {
+                alert('❌ Não foi possível copiar. Selecione o texto manualmente.');
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Auto-extrair ao carregar a página
+        window.onload = function() {
+            console.log('🚀 Página carregada, pronto para extrair configurações');
+            setTimeout(() => {
+                console.log('💡 Dica: Clique em "Extrair Minhas Configurações" para começar');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
