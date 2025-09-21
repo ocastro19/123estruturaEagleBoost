@@ -50,25 +50,20 @@ const MainContent: React.FC = () => {
   const [renderKey, setRenderKey] = React.useState(0);
   
   React.useEffect(() => {
-    // GARANTIA: Log do estado inicial do conteúdo
-    console.log('🔒 GARANTIA MainContent: Inicializando com conteúdo:', {
-      timestamp: new Date().toISOString(),
-      hasContent: !!content,
-      backgroundClass: backgroundClass
-    });
-    
-    // Força reload do conteúdo ao montar o componente
-    const latestContent = contentManager.getContent();
-    if (JSON.stringify(latestContent) !== JSON.stringify(content)) {
-      console.log('🔒 GARANTIA: Conteúdo desatualizado detectado, forçando atualização');
-      setRenderKey(prev => prev + 1);
+    // Força aplicação das configurações salvas
+    const savedContent = localStorage.getItem('site_content');
+    if (savedContent) {
+      try {
+        const parsedContent = JSON.parse(savedContent);
+        contentManager.updateContent(parsedContent);
+        console.log('✅ Configurações do localStorage aplicadas');
+      } catch (error) {
+        console.warn('Erro ao aplicar configurações salvas:', error);
+      }
     }
-    
+
     const handleAdminSave = () => {
       console.log('🔄 Admin content saved, forcing re-render');
-      console.log('🔒 GARANTIA: Alterações do admin detectadas, aplicando na main page');
-      // Força reload do contentManager
-      (window as any).contentManager = contentManager;
       setRenderKey(prev => prev + 1);
     };
     

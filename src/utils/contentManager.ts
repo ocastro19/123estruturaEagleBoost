@@ -245,12 +245,12 @@ export interface SiteContent {
 // Conteúdo padrão
 const defaultContent: SiteContent = {
   topBanner: {
-    title: "Baking Soda cures Impotence",
-    subtitle: "This secret recipe can reverse Impotence in just 7 Days",
-    buttonText: "WATCH BELOW AND SEE HOW IT WORKS",
-    titleColor: "text-blue-300",
+    title: "EAGLEBOOST - The Natural Solution",
+    subtitle: "Discover the breakthrough formula that's changing men's lives",
+    buttonText: "WATCH THE PRESENTATION BELOW",
+    titleColor: "text-white",
     subtitleColor: "text-blue-200",
-    buttonColor: "text-blue-300"
+    buttonColor: "text-yellow-300"
   },
   
   video: {

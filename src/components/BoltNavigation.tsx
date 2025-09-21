@@ -34,20 +34,11 @@ export const BoltNavigation: React.FC<BoltNavigationProps> = ({ currentPage, onP
 
   // GARANTIA: Se não estiver no Bolt, não renderiza o menu (verificação dupla)
   if (!isBoltEnvironment) {
-    // GARANTIA: Só força mostrar em casos muito específicos
-    const forceShow = process.env.NODE_ENV === 'development' || 
-                     localStorage.getItem('force_bolt_nav') === 'true' ||
-                     window.location.search.includes('bolt_nav=true');
-    
-    console.log('🔒 GARANTIA: Botão Bolt não será mostrado em produção:', {
+    console.log('🔒 GARANTIA: Botão Bolt REMOVIDO em produção:', {
       hostname: window.location.hostname,
-      forceShow: forceShow,
-      nodeEnv: process.env.NODE_ENV
+      isProduction: true
     });
-    
-    if (!forceShow) {
-      return null;
-    }
+    return null;
   }
 
   const pages = [
