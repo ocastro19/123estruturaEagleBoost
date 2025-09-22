@@ -245,12 +245,12 @@ export interface SiteContent {
 // Conteúdo padrão
 const defaultContent: SiteContent = {
   topBanner: {
-    title: "EAGLE BOOST ESTRUTURA PRONTA",
-    subtitle: "Discover the breakthrough formula that's changing men's lives",
+    title: "Discover Celtic Salt Trick",
+    subtitle: "This secret recipe can reverse Impotence in just 5 Days",
     buttonText: "WATCH THE PRESENTATION BELOW",
-    titleColor: "text-white",
+    titleColor: "bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent",
     subtitleColor: "text-blue-200",
-    buttonColor: "text-yellow-300"
+    buttonColor: "text-green-400"
   },
   
   video: {
