@@ -5,8 +5,8 @@ export const HeaderBlock: React.FC = () => {
   const doctors = useContentSection('doctors');
   const titleBlocks = useContentSection('titleBlocks');
   const clinicallyReviewed = titleBlocks?.clinicallyReviewed || {
-    title: '',
-    subtitle: '',
+    title: 'Clinically Reviewed.',
+    subtitle: 'Doctor Approved',
     titleColor: 'text-white',
     subtitleColor: 'text-white'
   };

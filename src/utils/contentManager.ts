@@ -245,7 +245,7 @@ export interface SiteContent {
 // Conteúdo padrão
 const defaultContent: SiteContent = {
   topBanner: {
-    title: "EAGLEBOOST - The Natural Solution",
+    title: "EAGLE BOOST ESTRUTURA PRONTA",
     subtitle: "Discover the breakthrough formula that's changing men's lives",
     buttonText: "WATCH THE PRESENTATION BELOW",
     titleColor: "text-white",
